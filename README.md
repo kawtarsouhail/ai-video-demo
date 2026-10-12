@@ -22,7 +22,7 @@ flowchart LR
 4. **TTS** converts Arabic text to speech (see [Voice](#voice)).
 5. **FFmpeg** assembles audio and visuals into the final video.
 
-![n8n workflow](docs/n8n-workflow.png)
+![n8n workflow](docs/n8n.png)
 
 ## Prerequisites
 
