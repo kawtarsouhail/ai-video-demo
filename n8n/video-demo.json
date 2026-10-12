@@ -1,0 +1,161 @@
+{
+  "name": "video-demo",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -304,
+        -48
+      ],
+      "id": "ce34d541-ec6a-416a-b97a-5e5ee9bae7b9",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "27f1b750-ecec-436c-bea8-a876420524bd",
+              "name": "topic",
+              "value": "4 conseils pour bien dormir",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -144,
+        -48
+      ],
+      "id": "ec256e09-c4e3-4f89-8b93-9fdad4327b5f",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n\"model\": \"openai/gpt-oss-120b\",\n\"response_format\": {\"type\": \"json_object\"},\n  \"messages\": [\n    {\"role\": \"system\", \"content\": \"Tu incarnes le Dr Salma, une présentatrice de santé à la voix rassurante, claire et bienveillante. Elle donne des conseils de bien-être simples, comme une médecin qui s'adresse à son patient : elle s'adresse directement au spectateur (« لنبدأ »، « أنصحك »)، utilise un ton calme et professionnel, des phrases courtes, aucun jargon, et ne promet jamais de guérison. Réponds UNIQUEMENT en JSON : {\\\"title\\\": \\\"...\\\", \\\"scenes\\\": [{\\\"number\\\": 1, \\\"text_ar\\\": \\\"...\\\", \\\"keyword_en\\\": \\\"...\\\"}]}. Exactement 5 scènes : 1) accroche et introduction, 2 et 3) deux conseils concrets, 4) un dernier conseil, 5) conclusion qui rappelle de consulter un médecin en cas de problème persistant. Chaque scène : 1 à 2 phrases courtes en arabe standard simple (très léger mot marocain accepté, pas de darija), faciles à traduire. keyword_en = 2-3 mots anglais pour chercher une image.\"},\n    {\"role\": \"user\", \"content\": \"Sujet : {{ $json.topic }}\"}\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        48,
+        -48
+      ],
+      "id": "60767b10-23d3-4e8e-ab5a-c54edf87474d",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tWX2Z1MJNOPlsEhT",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nreturn [{ json: JSON.parse($input.first().json.choices[0].message.content) }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        -48
+      ],
+      "id": "76292043-2342-4263-89f5-27b1154f95f9",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:8000/render",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({scenes: $json.scenes}) }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -96,
+        192
+      ],
+      "id": "da320b08-9269-4707-8811-3b6b1c4df37e",
+      "name": "HTTP Request1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "90b9de1b-ade5-49a2-a1de-e1c443edc472",
+  "meta": {
+    "instanceId": "dc1589ed38c2a75c3ae0e0a734e0df35181c83d1d0e82a6422e9f7588a1e6dc9"
+  },
+  "nodeGroups": [],
+  "id": "02FgN4Oo1NcNdZv8",
+  "tags": []
+}
